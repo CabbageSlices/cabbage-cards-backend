@@ -16,6 +16,15 @@ const io = socketIO(server);
 io.on('connection', (socket) => {
   console.log('Client connected');
   socket.on('disconnect', () => console.log('Client disconnected'));
+  socket.on('message', (e) => console.log(e));
+  socket.on('error', (e)=>console.log("sumthin"));
 });
 
-setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
+setInterval(() => {
+	var data = {
+		time: new Date().toTimeString()
+	}
+
+	io.emit('time', data)
+
+}, 1000);
