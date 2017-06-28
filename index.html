@@ -1,14 +1,35 @@
 <html>
   <body>
-    <p id='server-time'></p>
+    <p id='status'>NOT CONNECTED</p>
+
+    <input type="text" name="room code" id="roomCodeField"/>
+    <button onclick="connectToRoom()" id="connectButton">Connect </button>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
       var el = document.getElementById('server-time');
 
-      socket.on('time', function(Data) {
-        el.innerHTML = 'Server time: ' + Data.time;
-      });
+      socket.on('webClientConnectionRequest/accept', onConnectionAccepted)
+
+      function onConnectionAccepted(e) {
+        document.getElementById('status').innerHTML = `CONNECTED!!! playerId: ${e.playerId}`
+      }
+
+      function connectToRoom() {
+
+        socket.open();
+
+        var roomCode = document.getElementById("roomCodeField").value;
+
+        if(roomCode.length != 5) {
+          console.log('Invalid roomcode format');
+          return;
+        }
+
+        const name = 'nimesh'
+        socket.emit('webClient', { name, roomCode})
+      }
     </script>
   </body>
 </html>

@@ -1,5 +1,6 @@
 'use strict';
 
+const ClientManager = require('./src/client-manager.js');
 const express = require('express');
 const socketIO = require('socket.io');
 const path = require('path');
@@ -14,17 +15,10 @@ const server = express()
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  console.log(`client connected`);
+  socket.on('unityClient', () => ClientManager.onUnityConnected(socket) )
+  socket.on('webClient', (e) => ClientManager.onWebConnected(socket, e))
   socket.on('disconnect', () => console.log('Client disconnected'));
-  socket.on('message', (e) => console.log(e));
-  socket.on('error', (e)=>console.log("sumthin"));
+  socket.on('error', (e) => console.log("sumthin"));
+  socket.on('test', () => console.log('test'));
 });
-
-setInterval(() => {
-	var data = {
-		time: new Date().toTimeString()
-	}
-
-	io.emit('time', data)
-
-}, 1000);
