@@ -48,8 +48,8 @@ ClientManager.setupUnityEventListeners = function(roomCode) {
 	const socketId = this.unityClients[roomCode].socketId
 	var socket = this.sockets[socketId]
 	socket.on('disconnect', () => that.onUnityDisconnect(roomCode))
-	socket.on('webClientConnectionRequest/accept', (e) => this.onUnityWebClientAccept(roomCode, e) );
-	socket.on('webClientConnectionRequest/reject', (e) => this.onUnityWebClientReject(roomCode, e) );
+	socket.on('connectToServer/accept', (e) => this.onUnityWebClientAccept(roomCode, e) );
+	socket.on('connectToServer/reject', (e) => this.onUnityWebClientReject(roomCode, e) );
 }
 
 //roomCode: roomcode of the unity client that received this event
@@ -61,14 +61,25 @@ ClientManager.onUnityWebClientAccept = function(roomCode, acceptEventArgs) {
 
 	unityClient[acceptEventArgs.playerId] = webClientSocket.id
 
-	webClientSocket.emit('webClientConnectionRequest/accept', acceptEventArgs)
+	const messageData = Object.assign({messageType: 'connectToServer/accept'}, acceptEventArgs)
+	webClientSocket.emit('message', messageData)
+}
+
+ClientManager.onUnityWebClientReject = function(roomCode, rejectEventArgs) {
+	const webClientSocket = this.sockets[rejectEventArgs.webClientSocketId]
+	const unityClient = this.unityClients[roomCode]
+
+	delete this.sockets[rejectEventArgs.webClientSocketId]
+
+	const messageData = Object.assign({messageType: 'connectToServer/reject'}, rejectEventArgs)
+	webClientSocket.emit('message', messageData)
 }
 
 //callback for when a web client connects to the backend
 ClientManager.onWebConnected = function(socket, e) {
-
 	if(!this.checkValidRoomCode(e.roomCode)) {
-		socket.emit('invalidRoomCode');
+		socket.emit('message',  
+			{messageType: 'connectToServer/reject', message: 'invalid room code' });
 		socket.disconnect(true);
 		return;
 	}
@@ -84,7 +95,7 @@ ClientManager.onWebConnected = function(socket, e) {
 
 	const unitySocketId = this.unityClients[e.roomCode].socketId
 	const unitySocket = this.sockets[unitySocketId]
-	unitySocket.emit('webClientConnectionRequest', connectionRequestArgs)
+	unitySocket.emit('connectToServer', connectionRequestArgs)
 	this.onUnityWebClientAccept(e.roomCode, { playerId: 1, webClientSocketId: socket.id})
 }
 
