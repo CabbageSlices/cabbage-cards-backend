@@ -10,22 +10,6 @@ ClientManager.checkValidRoomCode = function(roomCode) {
 	return (roomCode in this.unityClients) 
 }
 
-// ClientManager.onDisconnect = function(socket) {
-// 	if(!(socket.id in this.sockets))
-// 		return //nothing ot handle since we aren't keeping track of it
-
-// 	const storedSocket = this.sockets[socket.id]
-	
-// 	if(storedSocket.connectionType === 'web') { 
-// 		//web client
-// 		this.onWebDisconnect();
-// 		return
-// 	}
-
-// 	this.onUnityDisconnect(socket)
-// }
-
-
 ClientManager.onUnityConnected = function(socket) {
 	console.log('Unity Client connected')
 
@@ -77,6 +61,7 @@ ClientManager.onUnityWebClientAccept = function(roomCode, acceptEventArgs) {
 	const webClientSocket = this.sockets[acceptEventArgs.webClientSocketId]
 	const unityClient = this.unityClients[roomCode]
 
+	console.log(acceptEventArgs)
 	if(!webClientSocket) {
 		const unitySocket = this.sockets[unityClient.socketId]
 		unitySocket.emit('webClientDisconnect', { webClientSocketId: acceptEventArgs.webClientSocketId })
@@ -115,8 +100,8 @@ ClientManager.onWebConnected = function(socket, e) {
 	this.setupWebEventListeners(socket)
 
 	const connectionRequestArgs = {
-		playerName: e.name,
-		socketId: socket.id
+		playerName: e.playerName,
+		webClientSocketId: socket.id
 	}
 
 	const unitySocketId = this.unityClients[e.roomCode].socketId
@@ -126,11 +111,13 @@ ClientManager.onWebConnected = function(socket, e) {
 
 ClientManager.setupWebEventListeners = function(socket) {
 	const that = this
-	socket.on('disconnect', () => that.onWebDisconnect(socket))
+	console.log('setup wweb listeners')
+	socket.on('disconnect', () => that.onWebDisconnect(socket) )
 }
 
 ClientManager.onWebDisconnect = function(socket) {
 
+	console.log('webClientDisconnect');
 	//let unity know the client has disconnected
 	if(this.checkValidRoomCode(socket.roomCode)) {
 		const unity = this.unityClients[socket.roomCode]

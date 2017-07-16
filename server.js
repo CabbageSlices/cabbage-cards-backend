@@ -12,9 +12,13 @@ const server = express()
   .use((req, res) => res.sendFile(INDEX) )
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
-const io = socketIO(server);
+const io = socketIO(server, {
+	pingInterval: 180000,
+	pingTimeout: 120000
+});
 
 io.on('connection', (socket) => {
+	console.log("TEST")
   socket.on('unityClient', () => ClientManager.onUnityConnected(socket) )
   socket.on('webClient', (e) => ClientManager.onWebConnected(socket, e))
   //socket.on('disconnect', () => ClientManager.onDisconnect(socket));
