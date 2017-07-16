@@ -17,7 +17,7 @@ const io = socketIO(server);
 io.on('connection', (socket) => {
   socket.on('unityClient', () => ClientManager.onUnityConnected(socket) )
   socket.on('webClient', (e) => ClientManager.onWebConnected(socket, e))
-  socket.on('disconnect', () => console.log('Client disconnected'));
+  //socket.on('disconnect', () => ClientManager.onDisconnect(socket));
   socket.on('error', (e) => console.log("sumthin"));
   socket.on('test', () => console.log('test'));
 });

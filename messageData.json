@@ -1,0 +1,59 @@
+{
+	"unityAndBackend": {
+
+		"unityClient": {},
+
+	  "generateRoomCode": {
+	    "roomCode": "string"
+	  },
+
+	  "disconnect": {},
+
+	  "connectToServer": {
+	    "playerName": "string",
+	    "webClientSocketId": "string"
+	  },
+
+	  "connectToServer/accept": {
+	    "playerName": "string",
+	    "webClientSocketId": "string"
+	  },
+
+	  "connectToServer/reject": {
+	    "playerName": "string",
+	    "WebClientSocketId": "string",
+	    "message": "string"
+	  },
+
+	  "webClientDisconnect": {
+
+	  	"webClientSocketId": "string"
+	  }
+	},
+
+  "webAndBackend": {
+
+  	"webClient": {
+
+  		"roomCode": "string",
+  		"playerName": "string"
+  	},
+
+  	"connectToServer/reject": {
+
+  		"message": "string"
+  	},
+
+  	"connectToServer/accept": {
+  		"playerName": "string",
+	    "webClientSocketId": "string"
+  	},
+
+
+  	"connectToServer/reject": {
+  		"playerName": "string",
+	    "webClientSocketId": "string",
+	    "message": "string"
+  	}
+  }
+}
