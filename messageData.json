@@ -39,11 +39,6 @@
   		"playerName": "string"
   	},
 
-  	"connectToServer/reject": {
-
-  		"message": "string"
-  	},
-
   	"connectToServer/accept": {
   		"playerName": "string",
 	    "webClientSocketId": "string"
