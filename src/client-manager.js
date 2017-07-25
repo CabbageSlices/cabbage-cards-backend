@@ -111,7 +111,7 @@ ClientManager.onWebConnected = function(socket, e) {
 
 ClientManager.setupWebEventListeners = function(socket) {
 	const that = this
-	console.log('setup wweb listeners')
+	console.log('setup web listeners')
 	socket.on('disconnect', () => that.onWebDisconnect(socket) )
 }
 
