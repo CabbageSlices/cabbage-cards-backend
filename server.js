@@ -23,5 +23,5 @@ io.on('connection', (socket) => {
   //socket.on('disconnect', () => ClientManager.onDisconnect(socket));
   socket.on('error', (e) => console.log("sumthin"));
   socket.on('test', () => console.log('test'));
-  socket.on('ping', () => socket.emit('pong', 'hi'));
+  socket.on('keepAlive', () => socket.emit('keepAlive'));
 });
