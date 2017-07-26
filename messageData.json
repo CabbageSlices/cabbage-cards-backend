@@ -28,6 +28,11 @@
 	  "webClientDisconnect": {
 
 	  	"webClientSocketId": "string"
+	  },
+
+	  "messageToClient": {
+	  	"messageType": "string"
+	  	...rest
 	  }
 	},
 
@@ -49,6 +54,14 @@
   		"playerName": "string",
 	    "webClientSocketId": "string",
 	    "message": "string"
+  	},
+
+  	"playerConnected": {
+  		"playerName": "string"
+  	},
+
+  	"playerDisconnected": {
+  		"playerName": "string"
   	}
   }
 }
