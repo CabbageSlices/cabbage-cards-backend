@@ -52,6 +52,23 @@ ClientManager.setupUnityEventListeners = function(roomCode) {
 	socket.on('disconnect', () => that.onUnityDisconnect(roomCode))
 	socket.on('connectToServer/accept', (e) => that.onUnityWebClientAccept(roomCode, e) );
 	socket.on('connectToServer/reject', (e) => that.onUnityWebClientReject(roomCode, e) );
+	socket.on('messageToClient', (e) => that.onUnityMessageToClient(roomCode, e));
+}
+
+ClientManager.onUnityMessageToClient = function(roomCode, messageEventArgs) {
+	const messageType = messageEventArgs.messageType
+	const targets = messageEventArgs.messageTargets
+
+	delete messageEventArgs.messageType
+	delete messageEventArgs.messageTargets
+
+	for(let i = 0; i < targets.length; ++i) {
+		const key = targets[i]
+		const socket = this.sockets[key]
+
+		if(socket)
+			socket.emit('message', Object.assign({ messageType }, messageEventArgs))
+	}
 }
 
 //roomCode: roomcode of the unity client that received this event
@@ -61,7 +78,7 @@ ClientManager.onUnityWebClientAccept = function(roomCode, acceptEventArgs) {
 	const webClientSocket = this.sockets[acceptEventArgs.webClientSocketId]
 	const unityClient = this.unityClients[roomCode]
 
-	console.log(acceptEventArgs)
+	//console.log(acceptEventArgs)
 	if(!webClientSocket) {
 		const unitySocket = this.sockets[unityClient.socketId]
 		unitySocket.emit('webClientDisconnect', { webClientSocketId: acceptEventArgs.webClientSocketId })
@@ -90,10 +107,11 @@ ClientManager.onWebConnected = function(socket, e) {
 		socket.emit('message',  
 			{messageType: 'connectToServer/reject', message: 'invalid room code' });
 		socket.disconnect(true);
+		console.log(e, this.unityClients)
 		return;
 	}
 
-	console.log('Web Client connected')
+	//console.log('Web Client connected')
 
 	socket.roomCode = e.roomCode
 	this.sockets[socket.id] = socket
@@ -111,13 +129,29 @@ ClientManager.onWebConnected = function(socket, e) {
 
 ClientManager.setupWebEventListeners = function(socket) {
 	const that = this
-	console.log('setup web listeners')
+	//console.log('setup web listeners')
 	socket.on('disconnect', () => that.onWebDisconnect(socket) )
+	socket.on('sendToUnity', (e) => that.onWebMessageToUnity(socket, e))
+}
+
+ClientManager.onWebMessageToUnity = function(socket, messageArgs) {
+
+	const messageType = messageArgs.messageType
+	if(!this.checkValidRoomCode(socket.roomCode)) {
+		socket.emit('message', {messageType: `${messageType}/error`, message: 'Not connected to Server'})
+		return
+	}
+
+	delete messageArgs.messageType
+
+	const unity = this.unityClients[socket.roomCode]
+	const unitySocket = this.sockets[unity.socketId]
+	unitySocket.emit(messageType, messageArgs)
 }
 
 ClientManager.onWebDisconnect = function(socket) {
 
-	console.log('webClientDisconnect');
+	//console.log('webClientDisconnect');
 	//let unity know the client has disconnected
 	if(this.checkValidRoomCode(socket.roomCode)) {
 		const unity = this.unityClients[socket.roomCode]
