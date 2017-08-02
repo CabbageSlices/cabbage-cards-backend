@@ -6,6 +6,7 @@ const UnityClient = {
 const createUnityClient = socketId => {
 	var client = Object.create(UnityClient)
 	client.socketId = socketId
+	client.connectedWebClients = {}
 	return client
 }
 

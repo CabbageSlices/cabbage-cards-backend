@@ -57,10 +57,29 @@ ClientManager.setupUnityEventListeners = function(roomCode) {
 
 ClientManager.onUnityMessageToClient = function(roomCode, messageEventArgs) {
 	const messageType = messageEventArgs.messageType
-	const targets = messageEventArgs.messageTargets
+	let targets = messageEventArgs.messageTargets
+	const target = messageEventArgs.messageTarget
 
-	delete messageEventArgs.messageType
-	delete messageEventArgs.messageTargets
+	messageEventArgs.messageType = undefined
+	messageEventArgs.messageTargets = undefined
+	
+	if(target !== undefined) {
+
+		const socket = this.sockets[target]
+		if(socket)
+			socket.emit('message', Object.assign({ messageType }, messageEventArgs ))
+
+		return
+	}
+
+	if(typeof targets === 'string') {
+		targets = []
+
+		for(var key in this.unityClients[roomCode].connectedWebClients)
+			targets.push(this.unityClients[roomCode].connectedWebClients[key])
+
+		console.log(targets)
+	}
 
 	for(let i = 0; i < targets.length; ++i) {
 		const key = targets[i]
@@ -85,7 +104,8 @@ ClientManager.onUnityWebClientAccept = function(roomCode, acceptEventArgs) {
 		return
 	}
 
-	unityClient.connectedWebClients[acceptEventArgs.playerId] = webClientSocket.id
+	unityClient.connectedWebClients[webClientSocket.id] = webClientSocket.id
+	this.unityClients[roomCode] = unityClient
 
 	const messageData = Object.assign({messageType: 'connectToServer/accept'}, acceptEventArgs)
 	webClientSocket.emit('message', messageData)
@@ -107,7 +127,6 @@ ClientManager.onWebConnected = function(socket, e) {
 		socket.emit('message',  
 			{messageType: 'connectToServer/reject', message: 'invalid room code' });
 		socket.disconnect(true);
-		console.log(e, this.unityClients)
 		return;
 	}
 
